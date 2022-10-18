@@ -6,7 +6,7 @@ const uuid = require('./helpers/uuid')
 
 
 // establishing port for app to run through
-const PORT = 3001;
+const PORT = process.env.PORT || 3001 ;
 // establishing express as app
 const app = express();
 
