@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-
+const uuid = require('./helpers/uuid')
 
 
 // establishing port for app to run through
@@ -21,6 +21,8 @@ app.use(express.static('public'));
 app.post('/api/notes', (req, res) => {
   
   let newNote = req.body;
+  // adds id for deletion
+  newNote.id=uuid()
 
   fs.readFile('./db/db.json', (err, data) => {
     console.log('data',JSON.parse(data))
@@ -39,6 +41,20 @@ app.post('/api/notes', (req, res) => {
 
 })
 
+// adds delete route and functionailty
+app.delete("/api/notes/:id", (req, res)=>{
+  let id = req.params.id; 
+  // let oldNotes = JSON.parse(data);
+  fs.readFile("./db/db.json", (err, data)=>{
+      let oldNotes = JSON.parse(data);
+      const newNotes = oldNotes.filter((note)=>!(id === note.id)); 
+      fs.writeFile("./db/db.json", JSON.stringify(newNotes), (err)=>{ 
+          err ? console.log(err) : console.log(`Deleted note:  ${id}.`); 
+      });
+  });
+  res.json("Item deleted");
+});
+
 // setting route for main page
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, '/public/index.html'))
@@ -54,6 +70,7 @@ app.get('/api/notes', (req, res) => {
   res.sendFile(path.join(__dirname, './db/db.json'))
 });
 
+// initializes the app
 app.listen(PORT, () =>
   console.log(`Note Taker listening at http://localhost:${PORT} 🚀`)
 );
